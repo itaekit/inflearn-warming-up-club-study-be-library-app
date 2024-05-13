@@ -6,6 +6,7 @@ import com.warmingup.libraryapp.dto.user.request.UserCreateRequest;
 import com.warmingup.libraryapp.dto.user.request.UserUpdateRequest;
 import com.warmingup.libraryapp.dto.user.response.UserResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,10 +21,12 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public void saveUser(UserCreateRequest request) {
         userRepository.save(new User(request.getName(), request.getAge()));
     }
 
+    @Transactional(readOnly = true)
     public List<UserResponse> getUsers() {
         return userRepository.findAll()
                 .stream()
@@ -31,6 +34,7 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public void updateUser(UserUpdateRequest request) {
         User user = userRepository
                 .findById(request.getId())
@@ -40,6 +44,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     public void deleteUser(String name) {
         User user = userRepository
                 .findByName(name)
