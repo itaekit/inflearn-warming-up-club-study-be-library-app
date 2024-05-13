@@ -7,8 +7,8 @@ public class UserResponse {
     private final String name;
     private final Integer age;
 
-    public UserResponse(Long id, User user) {
-        this.id = id;
+    public UserResponse(User user) {
+        this.id = user.getId();
         this.name = user.getName();
         this.age = user.getAge();
     }

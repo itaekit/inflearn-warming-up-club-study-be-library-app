@@ -1,12 +1,15 @@
 package com.warmingup.libraryapp.service.user;
 
+import com.warmingup.libraryapp.domain.user.User;
+import com.warmingup.libraryapp.domain.user.UserRepository;
 import com.warmingup.libraryapp.dto.user.request.UserCreateRequest;
 import com.warmingup.libraryapp.dto.user.request.UserUpdateRequest;
 import com.warmingup.libraryapp.dto.user.response.UserResponse;
-import com.warmingup.libraryapp.repository.user.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -18,18 +21,30 @@ public class UserService {
     }
 
     public void saveUser(UserCreateRequest request) {
-        userRepository.saveUser(request.getName(), request.getAge());
+        userRepository.save(new User(request.getName(), request.getAge()));
     }
 
     public List<UserResponse> getUsers() {
-        return userRepository.getUsers();
+        return userRepository.findAll()
+                .stream()
+                .map(UserResponse::new)
+                .collect(Collectors.toList());
     }
 
     public void updateUser(UserUpdateRequest request) {
-        userRepository.updateUser(request.getName(), request.getId());
+        User user = userRepository
+                .findById(request.getId())
+                .orElseThrow(IllegalArgumentException::new);
+
+        user.updateName(request.getName());
+        userRepository.save(user);
     }
 
     public void deleteUser(String name) {
-        userRepository.deleteUser(name);
+        User user = userRepository
+                .findByName(name)
+                .orElseThrow(IllegalArgumentException::new);
+
+        userRepository.delete(user);
     }
 }
