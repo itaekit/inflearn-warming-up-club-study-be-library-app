@@ -1,9 +1,10 @@
 package com.warmingup.libraryapp.domain.user;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.warmingup.libraryapp.domain.user.loanhistory.UserLoanHistory;
+import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class User {
@@ -13,6 +14,9 @@ public class User {
 
     private String name;
     private Integer age;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserLoanHistory> userLoanHistories = new ArrayList<>();
 
     protected User() {
     }
@@ -40,5 +44,19 @@ public class User {
 
     public void updateName(String name) {
         this.name = name;
+    }
+
+    public void loanBook(String bookName) {
+        userLoanHistories.add(new UserLoanHistory(this, bookName));
+    }
+
+    public void returnBook(String bookName) {
+        UserLoanHistory targetHistory = userLoanHistories
+                .stream()
+                .filter(history->history.getBookName().equals(bookName))
+                .findFirst()
+                .orElseThrow(()->new IllegalArgumentException("Book not found"));
+
+        targetHistory.doReturn();
     }
 }

@@ -35,12 +35,10 @@ public class BookService {
 
     @Transactional
     public void loanBook(BookLoanRequest request) {
-        // 책은 존재해?
         Book book = bookRepository
                 .findByName(request.getBookName())
                 .orElseThrow(IllegalArgumentException::new);
 
-        // 책은 대출 가능해?
         boolean bookNotAvailable = userLoanHistoryRepository
                 .existsByBookNameAndIsReturn(book.getName(), false);
 
@@ -48,12 +46,11 @@ public class BookService {
             throw new IllegalArgumentException("Book already loaned");
         }
 
-        // 대출
         User user = userRepository
                 .findByName(request.getUserName())
                 .orElseThrow(IllegalArgumentException::new);
 
-        userLoanHistoryRepository.save(new UserLoanHistory(user.getId(), book.getName()));
+        user.loanBook(book.getName());
     }
 
     @Transactional
@@ -62,10 +59,6 @@ public class BookService {
                 .findByName(request.getUserName())
                 .orElseThrow(IllegalArgumentException::new);
 
-        UserLoanHistory history = userLoanHistoryRepository
-                .findByUserIdAndBookName(user.getId(), request.getBookName())
-                .orElseThrow(IllegalArgumentException::new);
-
-        history.doReturn();
+        user.returnBook(request.getBookName());
     }
 }
